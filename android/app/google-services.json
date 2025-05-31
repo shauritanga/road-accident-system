@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1060591687534",
+    "project_id": "road-accident-system-dit",
+    "storage_bucket": "road-accident-system-dit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060591687534:android:cf2b1f1a1631049adad37f",
+        "android_client_info": {
+          "package_name": "com.example.road_accident_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRbAtDo40FWziCreIOpBwa3RRZCDUEp1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
