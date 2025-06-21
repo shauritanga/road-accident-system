@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:road_accident_system/models/accident_model.dart';
 import 'package:road_accident_system/providers/accident_provider.dart';
+import 'package:road_accident_system/providers/config_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:io';
@@ -37,58 +38,7 @@ class _AccidentReportFormState extends ConsumerState<AccidentReportForm> {
   String _selectedEnvironmentalFactors = '';
   final List<InvolvedParty> _involvedParties = [];
 
-  // Predefined options
-  final List<String> _accidentTypes = [
-    'Head-on Collision',
-    'Rear-end Collision',
-    'Side Impact',
-    'Rollover',
-    'Single Vehicle',
-    'Pedestrian Accident',
-    'Other',
-  ];
-
-  final List<String> _effects = [
-    'Fatal',
-    'Serious Injury',
-    'Minor Injury',
-    'Property Damage Only',
-    'No Damage',
-  ];
-
-  final List<String> _weatherConditions = [
-    'Clear',
-    'Rainy',
-    'Foggy',
-    'Cloudy',
-    'Stormy',
-    'Other',
-  ];
-
-  final List<String> _visibilityConditions = [
-    'Good',
-    'Fair',
-    'Poor',
-    'Very Poor',
-  ];
-
-  final List<String> _physiologicalIssues = [
-    'None',
-    'Fatigue',
-    'Alcohol',
-    'Drugs',
-    'Medical Condition',
-    'Other',
-  ];
-
-  final List<String> _environmentalFactors = [
-    'None',
-    'Poor Road Condition',
-    'Poor Lighting',
-    'Road Construction',
-    'Traffic Signal Issue',
-    'Other',
-  ];
+  // Configuration data will be loaded from Firebase
 
   @override
   void initState() {
@@ -716,51 +666,57 @@ class _AccidentReportFormState extends ConsumerState<AccidentReportForm> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDropdownField(
-                              labelText: 'Accident Type *',
-                              prefixIcon: Icons.warning,
-                              value:
-                                  _selectedType.isEmpty ? null : _selectedType,
-                              items:
-                                  _accidentTypes.map((type) {
-                                    return DropdownMenuItem(
-                                      value: type,
-                                      child: Text(type),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(() => _selectedType = value ?? '');
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final accidentTypesAsync = ref.watch(accidentTypesProvider);
+                                return accidentTypesAsync.when(
+                                  data: (accidentTypes) => _buildDropdownField(
+                                    labelText: 'Accident Type *',
+                                    prefixIcon: Icons.warning,
+                                    value: _selectedType.isEmpty ? null : _selectedType,
+                                    items: accidentTypes.map((type) {
+                                      return DropdownMenuItem(
+                                        value: type,
+                                        child: Text(type),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedType = value ?? '');
+                                    },
+                                    validator: (value) =>
+                                        value?.isEmpty ?? true ? 'Required' : null,
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Accident Type *', Icons.warning),
+                                  error: (error, stack) => _buildErrorDropdown('Accident Type *', Icons.warning),
+                                );
                               },
-                              validator:
-                                  (value) =>
-                                      value?.isEmpty ?? true
-                                          ? 'Required'
-                                          : null,
                             ),
                             SizedBox(height: 16),
 
-                            _buildDropdownField(
-                              labelText: 'Effects *',
-                              prefixIcon: Icons.medical_services,
-                              value:
-                                  _selectedEffects.isEmpty
-                                      ? null
-                                      : _selectedEffects,
-                              items:
-                                  _effects.map((effect) {
-                                    return DropdownMenuItem(
-                                      value: effect,
-                                      child: Text(effect),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(() => _selectedEffects = value ?? '');
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final effectTypesAsync = ref.watch(effectTypesProvider);
+                                return effectTypesAsync.when(
+                                  data: (effectTypes) => _buildDropdownField(
+                                    labelText: 'Effects *',
+                                    prefixIcon: Icons.medical_services,
+                                    value: _selectedEffects.isEmpty ? null : _selectedEffects,
+                                    items: effectTypes.map((effect) {
+                                      return DropdownMenuItem(
+                                        value: effect,
+                                        child: Text(effect),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedEffects = value ?? '');
+                                    },
+                                    validator: (value) =>
+                                        value?.isEmpty ?? true ? 'Required' : null,
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Effects *', Icons.medical_services),
+                                  error: (error, stack) => _buildErrorDropdown('Effects *', Icons.medical_services),
+                                );
                               },
-                              validator:
-                                  (value) =>
-                                      value?.isEmpty ?? true
-                                          ? 'Required'
-                                          : null,
                             ),
                           ],
                         ),
@@ -787,55 +743,57 @@ class _AccidentReportFormState extends ConsumerState<AccidentReportForm> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDropdownField(
-                              labelText: 'Weather *',
-                              prefixIcon: Icons.cloud,
-                              value:
-                                  _selectedWeather.isEmpty
-                                      ? null
-                                      : _selectedWeather,
-                              items:
-                                  _weatherConditions.map((weather) {
-                                    return DropdownMenuItem(
-                                      value: weather,
-                                      child: Text(weather),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(() => _selectedWeather = value ?? '');
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final weatherConditionsAsync = ref.watch(weatherConditionsProvider);
+                                return weatherConditionsAsync.when(
+                                  data: (weatherConditions) => _buildDropdownField(
+                                    labelText: 'Weather *',
+                                    prefixIcon: Icons.cloud,
+                                    value: _selectedWeather.isEmpty ? null : _selectedWeather,
+                                    items: weatherConditions.map((weather) {
+                                      return DropdownMenuItem(
+                                        value: weather,
+                                        child: Text(weather),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedWeather = value ?? '');
+                                    },
+                                    validator: (value) =>
+                                        value?.isEmpty ?? true ? 'Required' : null,
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Weather *', Icons.cloud),
+                                  error: (error, stack) => _buildErrorDropdown('Weather *', Icons.cloud),
+                                );
                               },
-                              validator:
-                                  (value) =>
-                                      value?.isEmpty ?? true
-                                          ? 'Required'
-                                          : null,
                             ),
                             SizedBox(height: 16),
 
-                            _buildDropdownField(
-                              labelText: 'Visibility *',
-                              prefixIcon: Icons.visibility,
-                              value:
-                                  _selectedVisibility.isEmpty
-                                      ? null
-                                      : _selectedVisibility,
-                              items:
-                                  _visibilityConditions.map((visibility) {
-                                    return DropdownMenuItem(
-                                      value: visibility,
-                                      child: Text(visibility),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(
-                                  () => _selectedVisibility = value ?? '',
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final visibilityConditionsAsync = ref.watch(visibilityConditionsProvider);
+                                return visibilityConditionsAsync.when(
+                                  data: (visibilityConditions) => _buildDropdownField(
+                                    labelText: 'Visibility *',
+                                    prefixIcon: Icons.visibility,
+                                    value: _selectedVisibility.isEmpty ? null : _selectedVisibility,
+                                    items: visibilityConditions.map((visibility) {
+                                      return DropdownMenuItem(
+                                        value: visibility,
+                                        child: Text(visibility),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedVisibility = value ?? '');
+                                    },
+                                    validator: (value) =>
+                                        value?.isEmpty ?? true ? 'Required' : null,
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Visibility *', Icons.visibility),
+                                  error: (error, stack) => _buildErrorDropdown('Visibility *', Icons.visibility),
                                 );
                               },
-                              validator:
-                                  (value) =>
-                                      value?.isEmpty ?? true
-                                          ? 'Required'
-                                          : null,
                             ),
                           ],
                         ),
@@ -862,49 +820,51 @@ class _AccidentReportFormState extends ConsumerState<AccidentReportForm> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildDropdownField(
-                              labelText: 'Physiological Issues',
-                              prefixIcon: Icons.person,
-                              value:
-                                  _selectedPhysiologicalIssues.isEmpty
-                                      ? null
-                                      : _selectedPhysiologicalIssues,
-                              items:
-                                  _physiologicalIssues.map((issue) {
-                                    return DropdownMenuItem(
-                                      value: issue,
-                                      child: Text(issue),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(
-                                  () =>
-                                      _selectedPhysiologicalIssues =
-                                          value ?? '',
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final physiologicalIssuesAsync = ref.watch(physiologicalIssuesProvider);
+                                return physiologicalIssuesAsync.when(
+                                  data: (physiologicalIssues) => _buildDropdownField(
+                                    labelText: 'Physiological Issues',
+                                    prefixIcon: Icons.person,
+                                    value: _selectedPhysiologicalIssues.isEmpty ? null : _selectedPhysiologicalIssues,
+                                    items: physiologicalIssues.map((issue) {
+                                      return DropdownMenuItem(
+                                        value: issue,
+                                        child: Text(issue),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedPhysiologicalIssues = value ?? '');
+                                    },
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Physiological Issues', Icons.person),
+                                  error: (error, stack) => _buildErrorDropdown('Physiological Issues', Icons.person),
                                 );
                               },
                             ),
                             SizedBox(height: 16),
 
-                            _buildDropdownField(
-                              labelText: 'Environmental Factors',
-                              prefixIcon: Icons.landscape,
-                              value:
-                                  _selectedEnvironmentalFactors.isEmpty
-                                      ? null
-                                      : _selectedEnvironmentalFactors,
-                              items:
-                                  _environmentalFactors.map((factor) {
-                                    return DropdownMenuItem(
-                                      value: factor,
-                                      child: Text(factor),
-                                    );
-                                  }).toList(),
-                              onChanged: (value) {
-                                setState(
-                                  () =>
-                                      _selectedEnvironmentalFactors =
-                                          value ?? '',
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final environmentalFactorsAsync = ref.watch(environmentalFactorsProvider);
+                                return environmentalFactorsAsync.when(
+                                  data: (environmentalFactors) => _buildDropdownField(
+                                    labelText: 'Environmental Factors',
+                                    prefixIcon: Icons.landscape,
+                                    value: _selectedEnvironmentalFactors.isEmpty ? null : _selectedEnvironmentalFactors,
+                                    items: environmentalFactors.map((factor) {
+                                      return DropdownMenuItem(
+                                        value: factor,
+                                        child: Text(factor),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      setState(() => _selectedEnvironmentalFactors = value ?? '');
+                                    },
+                                  ),
+                                  loading: () => _buildLoadingDropdown('Environmental Factors', Icons.landscape),
+                                  error: (error, stack) => _buildErrorDropdown('Environmental Factors', Icons.landscape),
                                 );
                               },
                             ),
@@ -1296,6 +1256,68 @@ Widget _buildSectionHeader(
       ),
       if (trailing != null) trailing,
     ],
+  );
+}
+
+// Helper method to build loading dropdown
+Widget _buildLoadingDropdown(String labelText, IconData prefixIcon) {
+  return Container(
+    height: 56,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.grey[300]!),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(prefixIcon, size: 20, color: Colors.grey[400]),
+        ),
+        Expanded(
+          child: Text(
+            'Loading $labelText...',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// Helper method to build error dropdown
+Widget _buildErrorDropdown(String labelText, IconData prefixIcon) {
+  return Container(
+    height: 56,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.red[300]!),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(prefixIcon, size: 20, color: Colors.red[400]),
+        ),
+        Expanded(
+          child: Text(
+            'Error loading $labelText',
+            style: TextStyle(color: Colors.red[600]),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(Icons.error_outline, size: 16, color: Colors.red[400]),
+        ),
+      ],
+    ),
   );
 }
 

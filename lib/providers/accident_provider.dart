@@ -11,3 +11,7 @@ final accidentServiceProvider = Provider<AccidentService>((ref) {
 final streamAccidentProvider = StreamProvider<List<Accident>>((ref) {
   return ref.watch(accidentServiceProvider).getAccidents();
 });
+
+final recentAccidentsProvider = StreamProvider<List<Accident>>((ref) {
+  return ref.watch(accidentServiceProvider).getRecentAccidents(limit: 5);
+});

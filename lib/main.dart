@@ -8,10 +8,15 @@ import 'package:road_accident_system/screens/admin/admin_screen.dart';
 import 'package:road_accident_system/screens/tarura/tarura_dashboard.dart';
 import 'package:road_accident_system/screens/user/home_screen.dart';
 import 'package:road_accident_system/screens/auth/login_screen.dart';
+import 'package:road_accident_system/utils/firebase_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize Firebase configuration data
+  await FirebaseInitializer.initializeAppData();
+
   runApp(ProviderScope(child: RoadAccidentApp()));
 }
 

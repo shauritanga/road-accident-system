@@ -13,6 +13,21 @@ class AccidentService {
   Stream<List<Accident>> getAccidents() {
     return _firestore
         .collection('accidents')
+        .orderBy('created_at', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) {
+                return Accident.fromFirestore(doc);
+              }).toList(),
+        );
+  }
+
+  Stream<List<Accident>> getRecentAccidents({int limit = 5}) {
+    return _firestore
+        .collection('accidents')
+        .orderBy('created_at', descending: true)
+        .limit(limit)
         .snapshots()
         .map(
           (snapshot) =>

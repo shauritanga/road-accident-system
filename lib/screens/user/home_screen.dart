@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:road_accident_system/models/accident_model.dart';
+import 'package:road_accident_system/providers/accident_provider.dart';
 import 'package:road_accident_system/providers/auth_provider.dart';
 import 'package:road_accident_system/screens/user/accident_report_form.dart';
 import 'package:road_accident_system/screens/user/help_and_guide_screen.dart';
@@ -270,73 +273,7 @@ class TrafficOfficerHomeScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
 
                   // Recent activity section
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'RECENT ACTIVITY',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                // View all activity
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                'View All',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _ActivityItem(
-                          icon: Icons.add_location_alt,
-                          title: 'Accident Reported',
-                          subtitle: 'Morogoro Road, Dar es Salaam',
-                          time: '2 hours ago',
-                          color: Colors.red[700]!,
-                        ),
-                        const Divider(height: 16),
-                        _ActivityItem(
-                          icon: Icons.edit_note,
-                          title: 'Report Updated',
-                          subtitle: 'Added vehicle details',
-                          time: 'Yesterday',
-                          color: Colors.blue[700]!,
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildRecentActivitySection(context, primaryColor),
 
                   const SizedBox(height: 24),
 
@@ -388,7 +325,7 @@ class TrafficOfficerHomeScreen extends ConsumerWidget {
                   // Footer
                   Center(
                     child: Text(
-                      '© 2023 Road Accident Information System',
+                      '© ${DateTime.now().year} Road Accident Information System',
                       style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                     ),
                   ),
@@ -399,6 +336,154 @@ class TrafficOfficerHomeScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildRecentActivitySection(BuildContext context, Color primaryColor) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final recentAccidentsAsync = ref.watch(recentAccidentsProvider);
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'RECENT ACTIVITY',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => StatisticsScreen(),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      'View All',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              recentAccidentsAsync.when(
+                data: (accidents) {
+                  if (accidents.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'No recent accidents reported',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: accidents.take(2).map((accident) {
+                      final timeAgo = _getTimeAgo(accident.createdAt);
+                      return Column(
+                        children: [
+                          _ActivityItem(
+                            icon: Icons.add_location_alt,
+                            title: 'Accident Reported',
+                            subtitle: '${accident.roadName}, ${accident.area}',
+                            time: timeAgo,
+                            color: _getAccidentColor(accident.effects),
+                          ),
+                          if (accident != accidents.last && accidents.length > 1)
+                            const Divider(height: 16),
+                        ],
+                      );
+                    }).toList(),
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (error, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'Error loading recent activity',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  Color _getAccidentColor(String effects) {
+    switch (effects.toLowerCase()) {
+      case 'fatal':
+        return Colors.red[700]!;
+      case 'serious injury':
+        return Colors.orange[700]!;
+      case 'minor injury':
+        return Colors.yellow[700]!;
+      default:
+        return Colors.blue[700]!;
+    }
   }
 }
 

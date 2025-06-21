@@ -608,8 +608,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen>
   Widget _buildSummaryCards(List<Accident> accidents) {
     final totalAccidents = accidents.length;
     final fatalAccidents = accidents.where((a) => a.effects == 'Fatal').length;
-    final injuryAccidents =
-        accidents.where((a) => a.effects == 'Injury').length;
+    final injuryAccidents = accidents
+        .where((a) =>
+            a.effects == 'Serious Injury' ||
+            a.effects == 'Minor Injury')
+        .length;
     final recentAccidents =
         accidents
             .where((a) => DateTime.now().difference(a.date).inDays <= 7)
