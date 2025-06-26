@@ -1,27 +1,36 @@
-import React, { useState } from 'react';
-import { Accident } from '../types';
-import { MapPin, Calendar, Camera, Users, Eye, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Accident } from "../types";
+import {
+  MapPin,
+  Calendar,
+  Camera,
+  Users,
+  Eye,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface AccidentTableProps {
   accidents: Accident[];
 }
 
-type SortField = 'date' | 'region' | 'type' | 'effects' | 'createdAt';
-type SortDirection = 'asc' | 'desc';
+type SortField = "date" | "region" | "type" | "effects" | "createdAt";
+type SortDirection = "asc" | "desc";
 
 export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
-  const [sortField, setSortField] = useState<SortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('desc');
+      setSortDirection("desc");
     }
   };
 
@@ -29,12 +38,12 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
     let aValue: any = a[sortField];
     let bValue: any = b[sortField];
 
-    if (sortField === 'date' || sortField === 'createdAt') {
+    if (sortField === "date" || sortField === "createdAt") {
       aValue = new Date(aValue).getTime();
       bValue = new Date(bValue).getTime();
     }
 
-    if (sortDirection === 'asc') {
+    if (sortDirection === "asc") {
       return aValue > bValue ? 1 : -1;
     } else {
       return aValue < bValue ? 1 : -1;
@@ -43,40 +52,53 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
 
   const totalPages = Math.ceil(sortedAccidents.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedAccidents = sortedAccidents.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedAccidents = sortedAccidents.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const getSeverityColor = (effects: string) => {
     switch (effects.toLowerCase()) {
-      case 'fatal':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'serious injury':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'minor injury':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'property damage only':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case "fatal":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "serious injury":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "minor injury":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "property damage only":
+        return "bg-blue-100 text-blue-800 border-blue-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  const SortButton: React.FC<{ field: SortField; children: React.ReactNode }> = ({ field, children }) => (
+  const SortButton: React.FC<{
+    field: SortField;
+    children: React.ReactNode;
+  }> = ({ field, children }) => (
     <button
       onClick={() => handleSort(field)}
       className="flex items-center space-x-1 text-left font-medium text-gray-900 hover:text-gray-700"
     >
       <span>{children}</span>
-      {sortField === field && (
-        sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-      )}
+      {sortField === field &&
+        (sortDirection === "asc" ? (
+          <ChevronUp className="h-4 w-4" />
+        ) : (
+          <ChevronDown className="h-4 w-4" />
+        ))}
     </button>
   );
 
   return (
     <div className="bg-white rounded-lg shadow-sm border">
       <div className="p-6 border-b">
-        <h3 className="text-lg font-semibold text-gray-900">Accident Records</h3>
-        <p className="text-sm text-gray-500">Detailed list of all accident reports</p>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Accident Records
+        </h3>
+        <p className="text-sm text-gray-500">
+          Detailed list of all accident reports
+        </p>
       </div>
 
       {/* Table */}
@@ -145,17 +167,23 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(accident.effects)}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(
+                      accident.effects
+                    )}`}
+                  >
                     {accident.effects}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="space-y-1">
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Weather:</span> {accident.weather}
+                      <span className="font-medium">Weather:</span>{" "}
+                      {accident.weather}
                     </div>
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Visibility:</span> {accident.visibility}
+                      <span className="font-medium">Visibility:</span>{" "}
+                      {accident.visibility}
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
                       {accident.involvedParties.length > 0 && (
@@ -177,10 +205,13 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
                   {formatDistanceToNow(accident.createdAt, { addSuffix: true })}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button className="text-blue-600 hover:text-blue-900 flex items-center">
+                  <Link
+                    to={`/accidents/${accident.id}`}
+                    className="text-blue-600 hover:text-blue-900 flex items-center"
+                  >
                     <Eye className="h-4 w-4 mr-1" />
                     View
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}
@@ -193,7 +224,9 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
         <div className="px-6 py-4 border-t bg-gray-50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, accidents.length)} of {accidents.length} results
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + itemsPerPage, accidents.length)} of{" "}
+              {accidents.length} results
             </div>
             <div className="flex space-x-2">
               <button
@@ -207,7 +240,9 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
               >
@@ -221,8 +256,12 @@ export const AccidentTable: React.FC<AccidentTableProps> = ({ accidents }) => {
       {accidents.length === 0 && (
         <div className="p-12 text-center">
           <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No accidents found</h3>
-          <p className="text-gray-500">No accident records match your current filters.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No accidents found
+          </h3>
+          <p className="text-gray-500">
+            No accident records match your current filters.
+          </p>
         </div>
       )}
     </div>
